@@ -333,11 +333,11 @@ Let us first examine the two-step process used to construct ImageNet:
 2. **Annotation process**. The preliminary labels were then reviewed by MTurk workers, who were only asked to confirm whether the object with the given label was present in the image. Notably, no alternative labels were suggested, such as other similar classes. The MTurkers were shown the target synset definition and a link to Wikipedia.
 
 
-**ImageNet-1k** was constructed later. It consists of three sets: a *training set* with over 1 million images, a *validation set* with 50,000 images, and a *test set* with 100,000 images. The training set is drawn from ImageNet. Images for the evaluation subsets were obtained through a process that tried to replicate the one used for the ImageNet. The new data were collected up to three years later than training data and then they were randomly split between the validation and test sets.
+**ImageNet-1k** was constructed later. It consists of three sets: a *training set* with over 1 million images, a *validation set* with 50,000 images, and a *test set* with 100,000 images. The training set is drawn from the original ImageNet. Images for the evaluation subsets were obtained through a process that tried to replicate the one used for the ImageNet. The new data were collected up to three years later than training data and then they were randomly split between the validation and test sets.
 
- ImageNet links each image category to a specific noun **WordNet** synset. WordNet is a comprehensive lexical database of English. It organizes nouns, verbs, adjectives, and adverbs into cognitive synonym sets, or synsets, each representing a unique concept (see the official [website](https://wordnet.princeton.edu/)).
+ ImageNet links each image category to a specific noun, a **WordNet** synset. WordNet is a comprehensive lexical database of English. It organizes nouns, verbs, adjectives, and adverbs into cognitive synonym sets, or synsets, each representing a unique concept (see the official [website](https://wordnet.princeton.edu/)).
 
-Each **synset** consists of one or more terms referred to as synonyms, for example *"church, church building"*. However, this is not true in all cases. For example, consider the synset *"diaper, nappy, napkin"*. Even though the first terms are synonyms, the third one is not. Moreover, there are cases where the same term belongs to more than one synset, e.g. there are two synsets named *"crane"* — one defining a bird and the second a machine. In ImageNet-1k they are separate classes. Think about the consequences for zero-shot classification with vision-language models (VLMs) like CLIP<d-cite key="15"/>.
+Each **synset** consists of one or more terms referred to as synonyms, for example *"church, church building"*. However, this is not true in all cases. For example, consider the synset *"diaper, nappy, napkin"*. Even though the first two terms are synonyms, the third one is not. Moreover, there are cases (homonymes) where the same term belongs to more than one synset, e.g. there are two synsets named *"crane"* — one defining a bird and the second one a machine, without any disambiguation within the synset name. In ImageNet-1k they are separate classes. Think about the consequences for zero-shot classification with vision-language models (VLMs) like CLIP<d-cite key="15"/>.
 
 We will demonstrate some issues related to dataset construction with a few examples.
 
@@ -367,14 +367,14 @@ We will demonstrate some issues related to dataset construction with a few examp
     Figure 4. Images from the <em style="color:grey;">"tiger cat"</em> class. (a) is a tiger cat. (b) is a cat, but the coat pattern is not clearly visible, it might be a <em style="color:grey;">"tabby, tabby cat"</em>, another ImageNet-1k class. (c) is a wild cat from the <em style="color:grey;">Leopardus</em> genus, not a domestic cat. (d) is a tiger.
 </div>
 
-Looking at the ***"tiger cat"*** images above, you might think "This seems to be a really diverse dataset...". Let us have a closer look. The *"tiger cat"* class is defined in WordNet as **"a cat having a striped coat"**, which aligns precisely with (a).
+Looking at the ***"tiger cat"*** images above, you might think "This seems to be a really diverse class...". Let us have a closer look. The *"tiger cat"* class is defined in WordNet as **"a cat having a striped coat"**, which aligns precisely with (a).
 
-To understand the issue with (b), we must know that ImageNet-1k also includes a ***"tabby, tabby cat"*** class, defined as **"a cat with a grey or tawny coat mottled with black"**. In common usage, tabby cat refers broadly to any domestic cat with a striped, spotted, or swirled coat pattern, all of which must include an "M" marking on their forehead (which can clearly be seen in this image). Most dictionaries agree that all tiger cats are tabbies, but not all tabby cats have the tiger pattern. However, even if we look at image (b) through the lens of WordNet definitions, it shows a grey cat, but its coat isn't clearly visible. Moreover, the term "mottled coat" in the tabby cat definition can be somewhat confusing, as some dictionaries consider stripes to be a type of mottling. So, how do we determine which type of cat this is? 
+To understand the issue with (b), we must know that ImageNet-1k also includes a ***"tabby, tabby cat"*** class, defined as **"a cat with a grey or tawny coat mottled with black"**. In common usage, tabby cat refers broadly to any domestic cat with a striped, spotted, or swirled coat pattern, all of which must include an "M" marking on their forehead (which can clearly be seen in this image). Most dictionaries agree that all tiger cats are tabbies, but not all tabby cats have the tiger pattern. However, even if we look at image (b) through the lens of WordNet definitions, it shows a grey cat, but its coat isn't clearly visible. Moreover, the term "mottled coat" in the tabby cat definition can be somewhat confusing, as some dictionaries consider stripes a type of mottling. So, how do we determine which type of cat this is? 
 
-We find modern large language models (LLMs) to be more accurate when handling such questions, so we asked them whether these two definitions overlap:
+We find modern large language models (LLMs) to be more accurate than WordNet when handling such questions, so we asked them whether these two definitions overlap:
 
 <div class="llm-cite">
-    Yes, the "tabby, tabby cat" definition and the "tiger cat" definition overlap. While the first definition is broader in its description of coloration and pattern, the second one specifies the striped aspect, which is a common characteristic of the broader "mottled" description in the first.
+    Yes, the "tabby, tabby cat" definition and the "tiger cat" definitions overlap. While the first definition is broader in its description of coloration and pattern, the second one specifies the striped aspect, which is a common characteristic of the broader "mottled" description in the first.
 </div>
 
 -- *ChatGPT-4o* 
@@ -393,8 +393,8 @@ This raises the question: *If WordNet definitions are not precise enough, what i
 We are not wildlife experts, but we can say that either an oncilla, ocelot, or margay may be seen in \(c). While this might seem like harmless noise, common in such large datasets, these animals do appear more than once in the training set. In everyday language, *"tiger cat"* is even more commonly used to refer to these wild cats than to striped domestic ones; however, these usages coexist simultaneously. 
 
 
-We have already mentioned the WordNet definition of the *"tiger cat"* synset; WordNet also contains  ***"tiger cat, Felis tigrina"*** synset, defined as **"a medium-sized wildcat of Central America and South America having a dark-striped coat"**.
-All three of the possible species of cats we’ve mentioned as possible labels for \(c) fall under this definition. Consistently annotating *"tiger cat"* images given such a confusing background is difficult for experts, and probably impossible for MTurkers.
+We have already mentioned the WordNet definition of the *"tiger cat"* synset; WordNet also contains the ***"tiger cat, Felis tigrina"*** synset, defined as **"a medium-sized wildcat of Central America and South America having a dark-striped coat"**.
+All three of the possible species of cats we’ve mentioned as possible labels for \(c) fall under this definition. Consistently annotating *"tiger cat"* images given such a confusing background is difficult for experts, and nearly impossible for MTurkers.
 
 
 Obviously, (d) is a tiger, which has its own synset, ***"tiger, Panthera tigris"***, in ImageNet-1k. Such tigers make up a significant portion of the "tiger cat" class in both the training and validation sets.
@@ -467,7 +467,7 @@ We expected the issues described above to have a clear impact on the results of 
 
 <div style="margin: 20px 0px 20px 0px; color:grey; font-size:14px; font-weight:600; line-height: 1.3;">Table 1. OpenCLIP predictions for classes related to '<a style="color:grey;" href="#the-cat-problem">The Cat Problem</a>'.</div>
 
-Note that the differences can be both due to OpenCLIP's errors and wrong ground truth labels. Nearly a quarter of the images in *"tiger cat"* class are predicted to be tigers, which we trust to be an estimate of the percentage of tigers in the training data of the class. Only 6.9% of images are predicted as *"tiger cat"*, highlighting the conceptual overlap with *"tabby, tabby cat"*.
+Note that the differences can be both due to OpenCLIP's errors and wrong ground truth labels. Nearly a quarter of the images in *"tiger cat"* class are predicted to be tigers, which we trust to be an accurate estimate of the percentage of tigers in the training data of the class. Only 6.9% of images are predicted as *"tiger cat"*, highlighting the conceptual overlap with *"tabby, tabby cat"*.
 
 <div style="display:flex; align-items:center; justify-content: center; margin:20px; font-size:14px;">
     <table style="border-collapse: collapse; text-align: center; border: 0px;">
@@ -506,8 +506,7 @@ Approximately 80% of the images in both classes were predicted to be either a no
 
 The examples demonstrate that the incorrect labels are not just random noise, but are also an outcome of the dataset's construction process. WordNet might not have been the most suitable foundation to build on, as its definitions are not precise enough. Also, some meanings shift over time, which is a problem in the era of VLMs. Perhaps WordNet and ImageNet should co-evolve.
 
-
-Relying solely on MTurkers and using Wikipedia (a source that may be edited by non-experts, updated in real-time, or lack precise definitions) not only led to the inclusion of noisy labels but also sometimes distorted the very concepts that the classes were intended to represent. For example, the *"sunglasses, dark glasses, shades"* and *"sunglass"* classes represent the same object — sunglasses. While this is accurate for the former class, the latter class is defined in WordNet as "a convex lens that focuses the rays of the sun; used to start a fire".
+Relying solely on MTurkers and using Wikipedia (a source that may be edited by non-experts, updated in real-time, or lacks precise definitions) not only led to the inclusion of noisy labels but also sometimes distorted the very concepts that the classes were intended to represent. For example, the *"sunglasses, dark glasses, shades"* and *"sunglass"* classes represent the same object — sunglasses. While this is accurate for the former class, the latter class is defined in WordNet as "a convex lens that focuses the rays of the sun; used to start a fire".
 This definition was lost during the dataset's construction process, resulting in two classes representing the same concept.
 
 
@@ -938,7 +937,7 @@ In the notebook, the authors suggest further work with class names is necessary,
 
 To illustrate the impact of class names in zero-shot recognition, we developed a new set of ["modified" class names](https://gist.github.com/lasickaKolcava/dd86fc8ed496735e2a57c46ccf67996d), building on OpenAI’s version. In the experiments, we decided to use OpenCLIP, an open-source implementation that outperforms the original CLIP model.
 
-**Table 6** shows recognition accuracy for the five classes with the most significant gain when using OpenAI class names vs. the original ImageNet names. The changes of the text whose embedding is used primarily address CLIP's need for a broader context. For instance, in ImageNet, *"sorrel"* refers to a horse coloring, while in common usage, we’re used to hearing it refer to a [plant](https://en.wikipedia.org/wiki/Sorrel). This can be a problem for VLMs due to the lack of context, which in turn the new class name *"common sorrel horse"* provides.
+**Table 6** shows recognition accuracy for the five classes with the most significant gain when using OpenAI class names vs. the original ImageNet names. The changes of the text whose embedding is used primarily to address CLIP's need for a broader context. For instance, in ImageNet, *"sorrel"* refers to a horse coloring, while in common usage, we’re used to hearing it refer to a [plant](https://en.wikipedia.org/wiki/Sorrel). This can be a problem for VLMs due to the lack of context, which in turn the new class name *"common sorrel horse"* provides.
 
 <table style="margin-top: 20px;">
   <thead>
@@ -1201,7 +1200,7 @@ Finally, the *"black-footed ferret"* class contains only one image of this speci
 
 Luccioni and Rolnick (2022)<d-cite key="19"/> analyzed the classes representing wildlife species and the misrepresentation of biodiversity within the ImageNet-1k dataset. Their findings reveal a substantial proportion of incorrect labels across these classes. Notably, they examined the class *"black-footed ferret"* and reported results consistent with those observed in our relabeling process.
 
-## New Contribution to ImageNet Dataset Knowledge
+## New Contributions to the knowledge about ImageNet 
 1. **Detailed Dataset Construction Issues**  
    - Explained the problem with using MTurkers in dataset construction, and showing the WordNet definitions issues with the tiger cat example.  
 
